@@ -1,48 +1,55 @@
-import SwiftSyntax
-import SwiftSyntaxBuilder
-import SwiftSyntaxMacros
-import SwiftSyntaxMacrosTestSupport
-import XCTest
+import MacroTesting
+import Testing
 
-// Macro implementations build for the host, so the corresponding module is not available when cross-compiling. Cross-compiled tests may still make use of the macro itself in end-to-end tests.
 #if canImport(DatabaseMacrosMacros)
 import DatabaseMacrosMacros
 
-let testMacros: [String: Macro.Type] = [
-    "stringify": StringifyMacro.self,
-]
-#endif
+@Suite(.macros([TableMacro.self]), .snapshots(record: .failed))
+struct DatabaseMacrosTests {
+  @Test
+  func basic() {
+    assertMacro {
+      """
+      @Table
+      struct MyType {
+        var x: Int
+        var y: Int
+        var z: Int
+      }
+      """
+    } expansion: {
+      """
+      struct MyType {
+        var x: Int
+        var y: Int
+        var z: Int
+      }
 
-final class DatabaseMacrosTests: XCTestCase {
-    func testMacro() throws {
-        #if canImport(DatabaseMacrosMacros)
-        assertMacroExpansion(
-            """
-            #stringify(a + b)
-            """,
-            expandedSource: """
-            (a + b, "a + b")
-            """,
-            macros: testMacros
-        )
-        #else
-        throw XCTSkip("macros are only supported when running tests for the host platform")
-        #endif
-    }
+      extension MyType {
+        enum Columns {
+          static let x = Column("x")
+          static let y = Column("y")
+          static let z = Column("z")
+        }
 
-    func testMacroWithStringLiteral() throws {
-        #if canImport(DatabaseMacrosMacros)
-        assertMacroExpansion(
-            #"""
-            #stringify("Hello, \(name)")
-            """#,
-            expandedSource: #"""
-            ("Hello, \(name)", #""Hello, \(name)""#)
-            """#,
-            macros: testMacros
-        )
-        #else
-        throw XCTSkip("macros are only supported when running tests for the host platform")
-        #endif
+        static var databaseSelection: [any SQLSelectable] {
+          [Column("x"), Column("y"), Column("z")]
+        }
+
+        init(row: Row) throws {
+          self.x = row[0]
+          self.y = row[0]
+          self.z = row[0]
+        }
+
+        func encode(to container: inout PersistenceContainer) throws {
+          container[Columns.x] = x
+          container[Columns.y] = y
+          container[Columns.z] = z
+        }
+      }
+      """
     }
+  }
 }
+#endif
