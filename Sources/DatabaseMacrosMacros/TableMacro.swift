@@ -21,6 +21,7 @@ public struct TableMacro: ExtensionMacro {
       .reduce(into: ([String](), [String](), [String](), [String](), 0)) { partialResult, member in
         guard
           let variable = member.decl.as(VariableDeclSyntax.self),
+          variable.isInstance,
           let binding = variable.bindings.first,
           let pattern = binding.pattern.as(IdentifierPatternSyntax.self)
         else {
@@ -30,22 +31,22 @@ public struct TableMacro: ExtensionMacro {
         let varName = pattern.identifier.trimmedDescription
 
         partialResult.0.append(#"static let \#(varName) = Column("\#(varName)")"#)
-        partialResult.1.append(#"Column("\#(varName)")"#)
+        partialResult.1.append(#"Columns.\#(varName)"#)
         partialResult.2.append(#"self.\#(varName) = row[\#(partialResult.4)]"#)
         partialResult.3.append(#"container[Columns.\#(varName)] = \#(varName)"#)
         partialResult.4 += 1
-    }
+      }
 
     let decl: DeclSyntax = """
     extension \(type) {
       enum Columns {
         \(raw: columns.joined(separator: "\n    "))
       }
-    
+
       static var databaseSelection: [any SQLSelectable] {
         [\(raw: selections.joined(separator: ", "))]
       }
-    
+
       init(row: Row) throws {
         \(raw: decodes.joined(separator: "\n    "))
       }

@@ -1,25 +1,21 @@
 // swift-tools-version: 6.2
 
-import PackageDescription
 import CompilerPluginSupport
+import PackageDescription
 
 let package = Package(
   name: "DatabaseMacros",
   platforms: [
-    .macOS(.v10_15),
+    .macOS(.v13),
     .iOS(.v13),
     .tvOS(.v13),
     .watchOS(.v6),
-    .macCatalyst(.v13)
+    .macCatalyst(.v13),
   ],
   products: [
     .library(
       name: "DatabaseMacros",
       targets: ["DatabaseMacros"]
-    ),
-    .executable(
-      name: "DatabaseMacrosClient",
-      targets: ["DatabaseMacrosClient"]
     ),
   ],
   dependencies: [
@@ -35,6 +31,10 @@ let package = Package(
       url: "https://github.com/swiftlang/swift-syntax",
       from: "602.0.0"
     ),
+    .package(
+      url: "https://github.com/ordo-one/package-benchmark",
+      from: "1.29.0"
+    ),
   ],
   targets: [
     .macro(
@@ -47,7 +47,7 @@ let package = Package(
         .product(
           name: "SwiftCompilerPlugin",
           package: "swift-syntax"
-        )
+        ),
       ]
     ),
     .target(
@@ -55,10 +55,15 @@ let package = Package(
       dependencies: ["DatabaseMacrosMacros"]
     ),
     .executableTarget(
-      name: "DatabaseMacrosClient",
+      name: "DatabaseMacrosBenchmarks",
       dependencies: [
         "DatabaseMacros",
         .product(name: "GRDB", package: "GRDB.swift"),
+        .product(name: "Benchmark", package: "package-benchmark"),
+      ],
+      path: "Benchmarks/DatabaseMacrosBenchmarks",
+      plugins: [
+        .plugin(name: "BenchmarkPlugin", package: "package-benchmark"),
       ]
     ),
     .testTarget(

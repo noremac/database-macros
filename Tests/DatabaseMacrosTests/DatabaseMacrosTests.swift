@@ -33,13 +33,13 @@ struct DatabaseMacrosTests {
         }
 
         static var databaseSelection: [any SQLSelectable] {
-          [Column("x"), Column("y"), Column("z")]
+          [Columns.x, Columns.y, Columns.z]
         }
 
         init(row: Row) throws {
           self.x = row[0]
-          self.y = row[0]
-          self.z = row[0]
+          self.y = row[1]
+          self.z = row[2]
         }
 
         func encode(to container: inout PersistenceContainer) throws {

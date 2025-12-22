@@ -3,7 +3,7 @@ import SwiftSyntaxMacros
 
 @main
 struct DatabaseMacrosPlugin: CompilerPlugin {
-    let providingMacros: [Macro.Type] = [
-        TableMacro.self,
-    ]
+  let providingMacros: [Macro.Type] = [
+    TableMacro.self,
+  ]
 }

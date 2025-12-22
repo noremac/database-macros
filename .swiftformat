@@ -1,0 +1,33 @@
+--exclude .build/**/*
+--exclude Scripts/**/*
+
+# rules
+
+--disable hoistAwait
+--disable hoistTry
+--disable redundantPublic
+--disable trailingClosures
+--enable acronyms
+--enable blankLineAfterImports
+--enable blankLinesBetweenScopes
+--enable conditionalAssignment
+--enable wrapEnumCases
+--enable wrapSwitchCases
+
+# options
+
+--acronyms URL,UUID
+--trailingcommas collections-only
+--exponentcase lowercase
+--header strip
+--ifdef no-indent
+--importgrouping testable-last
+--indent 2
+--patternlet inline
+--ranges no-space
+--self init-only
+--stripunusedargs unnamed-only
+--wraparguments before-first
+--wrapcollections before-first
+--wrapparameters before-first
+
