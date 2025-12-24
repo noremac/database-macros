@@ -40,7 +40,7 @@ func makeDBQueue(seed: Bool = true) throws -> DatabaseQueue {
   return dbQueue
 }
 
-struct Foo: Codable, DatabaseValueConvertible {
+struct Foo: Codable {
   var a: Int
   var b: Int
   var c: Int
@@ -51,7 +51,7 @@ struct FullCodableItem: Codable, FetchableRecord, PersistableRecord {
     "item"
   }
 
-  var id: Int
+  var id: Int?
   var a: Int?
   var b: Int?
   var c: Int?
@@ -64,7 +64,7 @@ struct FullTableItem: FetchableRecord, PersistableRecord {
     "item"
   }
 
-  var id: Int
+  var id: Int?
   var a: Int?
   var b: Int?
   var c: Int?
@@ -76,7 +76,7 @@ struct LightCodableItem: Codable, FetchableRecord, PersistableRecord {
     "item"
   }
 
-  var id: Int
+  var id: Int?
   var a: Int?
   var b: Int?
   var c: Int?
@@ -88,7 +88,7 @@ struct LightTableItem: FetchableRecord, PersistableRecord {
     "item"
   }
 
-  var id: Int
+  var id: Int?
   var a: Int?
   var b: Int?
   var c: Int?

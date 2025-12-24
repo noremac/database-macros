@@ -4,7 +4,7 @@ import Testing
 #if canImport(DatabaseMacrosMacros)
 import DatabaseMacrosMacros
 
-@Suite(.macros([TableMacro.self]), .snapshots(record: .failed))
+@Suite(.macros([TableMacro.self]), .snapshots(record: .failed), .serialized)
 struct DatabaseMacrosTests {
   @Test
   func basic() {
@@ -31,11 +31,11 @@ struct DatabaseMacrosTests {
         }
 
         init(row: Row) throws {
-          self.x = row[0]
+          self.x = try row._decode(recordType: Self.self, column: Columns.x, index: 0)
         }
 
         func encode(to container: inout PersistenceContainer) throws {
-          container[Columns.x] = x
+          try container._encode(x, recordType: Self.self, column: Columns.x)
         }
       }
       """
@@ -69,11 +69,11 @@ struct DatabaseMacrosTests {
         }
 
         init(row: Row) throws {
-          self.x = row[0]
+          self.x = try row._decode(recordType: Self.self, column: Columns.x, index: 0)
         }
 
         func encode(to container: inout PersistenceContainer) throws {
-          container[Columns.x] = x
+          try container._encode(x, recordType: Self.self, column: Columns.x)
         }
       }
       """
