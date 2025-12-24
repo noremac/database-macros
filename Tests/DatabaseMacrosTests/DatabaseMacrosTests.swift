@@ -13,39 +13,67 @@ struct DatabaseMacrosTests {
       @Table
       struct MyType {
         var x: Int
-        var y: Int
-        var z: Int
       }
       """
     } expansion: {
       """
       struct MyType {
         var x: Int
-        var y: Int
-        var z: Int
       }
 
       extension MyType {
         enum Columns {
           static let x = Column("x")
-          static let y = Column("y")
-          static let z = Column("z")
         }
 
         static var databaseSelection: [any SQLSelectable] {
-          [Columns.x, Columns.y, Columns.z]
+          [Columns.x]
         }
 
         init(row: Row) throws {
           self.x = row[0]
-          self.y = row[1]
-          self.z = row[2]
         }
 
         func encode(to container: inout PersistenceContainer) throws {
           container[Columns.x] = x
-          container[Columns.y] = y
-          container[Columns.z] = z
+        }
+      }
+      """
+    }
+  }
+
+  @Test
+  func `column name override`() {
+    assertMacro {
+      """
+      @Table
+      struct MyType {
+        @Column("other")
+        var x: Int
+      }
+      """
+    } expansion: {
+      """
+      struct MyType {
+        @Column("other")
+        var x: Int
+      }
+
+      extension MyType {
+        enum Columns {
+          static let x = Column("other")
+        }
+
+        static var databaseSelection: [any SQLSelectable] {
+          [Columns.x]
+        }
+
+        init(row: Row) throws {
+          self.x = row[0]
+        }
+
+        func encode(to container: inout PersistenceContainer) throws {
+          container[Columns.x] = x
         }
       }
       """

@@ -15,27 +15,34 @@ public struct TableMacro: ExtensionMacro {
       return []
     }
 
-    let (columns, selections, decodes, encodes, _) = declaration
-      .memberBlock
-      .members
-      .reduce(into: ([String](), [String](), [String](), [String](), 0)) { partialResult, member in
-        guard
-          let variable = member.decl.as(VariableDeclSyntax.self),
-          variable.isInstance,
-          let binding = variable.bindings.first,
-          let pattern = binding.pattern.as(IdentifierPatternSyntax.self)
-        else {
-          return
-        }
-
-        let varName = pattern.identifier.trimmedDescription
-
-        partialResult.0.append(#"static let \#(varName) = Column("\#(varName)")"#)
-        partialResult.1.append(#"Columns.\#(varName)"#)
-        partialResult.2.append(#"self.\#(varName) = row[\#(partialResult.4)]"#)
-        partialResult.3.append(#"container[Columns.\#(varName)] = \#(varName)"#)
-        partialResult.4 += 1
+    let columnVars = declaration.memberBlock.members.compactMap { member in
+      if let variable = member.decl.as(VariableDeclSyntax.self),
+         variable.isValidColumnVar
+      {
+        variable
+      } else {
+        nil
       }
+    }
+
+    var columns = [String]()
+    var selections = [String]()
+    var decodes = [String]()
+    var encodes = [String]()
+
+    for (idx, variable) in columnVars.enumerated() {
+      guard let pattern = variable.bindings.first?.pattern.as(IdentifierPatternSyntax.self) else {
+        return []
+      }
+
+      let varName = pattern.identifier.trimmedDescription
+      let columnName = variable.columnNameOverride() ?? varName
+
+      columns.append(#"static let \#(varName) = Column("\#(columnName)")"#)
+      selections.append(#"Columns.\#(varName)"#)
+      decodes.append(#"self.\#(varName) = row[\#(idx)]"#)
+      encodes.append(#"container[Columns.\#(varName)] = \#(varName)"#)
+    }
 
     let decl: DeclSyntax = """
     extension \(type) {
