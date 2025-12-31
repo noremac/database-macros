@@ -10,7 +10,8 @@ public extension Row {
     column: some ColumnExpression,
     index: Int
   ) throws -> V
-  where V: DatabaseValueConvertible {
+    where V: DatabaseValueConvertible
+  {
     self[index]
   }
 
@@ -20,7 +21,8 @@ public extension Row {
     column: some ColumnExpression,
     index: Int
   ) throws -> V
-  where V: DatabaseValueConvertible & StatementColumnConvertible {
+    where V: DatabaseValueConvertible & StatementColumnConvertible
+  {
     self[index]
   }
 
@@ -31,7 +33,8 @@ public extension Row {
     column: some ColumnExpression,
     index: Int
   ) throws -> V
-  where V: Decodable {
+    where V: Decodable
+  {
     try withUnsafeData(atIndex: index) { data in
       let decoder = recordType.databaseJSONDecoder(for: column.name)
       return try decoder.decode(V.self, from: data ?? Data())
