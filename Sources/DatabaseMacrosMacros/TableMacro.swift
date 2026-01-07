@@ -36,7 +36,7 @@ public struct TableMacro: ExtensionMacro {
       }
 
       let varName = pattern.identifier.trimmedDescription
-      let columnName = variable.columnNameOverride() ?? varName
+      let columnName = variable.columnNameOverride ?? varName
 
       columns.append(#"static let \#(varName) = Column("\#(columnName)")"#)
       selections.append(#"Columns.\#(varName)"#)

@@ -17,25 +17,35 @@ extension VariableDeclSyntax {
     return true
   }
 
-  func columnNameOverride() -> String? {
+  var columnAttribute: AttributeSyntax? {
     for attribute in attributes {
       switch attribute {
       case .attribute(let attr):
         if attr.attributeName.tokens(viewMode: .all).map(\.tokenKind) == [.identifier("Column")] {
-          guard case .argumentList(let list) = attr.arguments else {
-            return nil
-          }
-
-          for argument in list {
-            if let expression = argument.expression.as(StringLiteralExprSyntax.self), expression.segments.count == 1 {
-              return expression.segments.first?.trimmedDescription
-            }
-          }
+          return attr
         }
       default:
-        break
+        continue
       }
     }
+
+    return nil
+  }
+
+  var columnNameOverride: String? {
+    guard
+      let attr = columnAttribute,
+      case .argumentList(let list) = attr.arguments
+    else {
+      return nil
+    }
+
+    for argument in list {
+      if let expression = argument.expression.as(StringLiteralExprSyntax.self), expression.segments.count == 1 {
+        return expression.segments.first?.trimmedDescription
+      }
+    }
+
     return nil
   }
 
