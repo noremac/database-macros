@@ -59,6 +59,21 @@ struct FullCodableItem: Codable, FetchableRecord, PersistableRecord {
 }
 
 @Table
+struct X: FetchableRecord, PersistableRecord {
+  static var databaseTableName: String {
+    "item"
+  }
+
+  var id: Int
+  var a: Int?
+  var b: Int?
+  var c: Int?
+
+  @Column(transformer: OptionalCodableValueTransformer<Foo>.self)
+  var foo: Foo?
+}
+
+@Table
 struct FullTableItem: FetchableRecord, PersistableRecord {
   static var databaseTableName: String {
     "item"

@@ -40,8 +40,14 @@ public struct TableMacro: ExtensionMacro {
 
       columns.append(#"static let \#(varName) = Column("\#(columnName)")"#)
       selections.append(#"Columns.\#(varName)"#)
-      decodes.append(#"self.\#(varName) = row[\#(idx)]"#)
-      encodes.append(#"container[Columns.\#(varName)] = \#(varName)"#)
+
+      if let transform = variable.columnTransformerName {
+        decodes.append(#"self.\#(varName) = try \#(transform).fromDatabaseValue(row[\#(idx)])"#)
+        encodes.append(#"container[Columns.\#(varName)] = try \#(transform).toDatabaseValue(\#(varName))"#)
+      } else {
+        decodes.append(#"self.\#(varName) = row[\#(idx)]"#)
+        encodes.append(#"container[Columns.\#(varName)] = \#(varName)"#)
+      }
     }
 
     let decl: DeclSyntax = """

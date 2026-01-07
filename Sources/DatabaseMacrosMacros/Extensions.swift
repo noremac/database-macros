@@ -49,6 +49,27 @@ extension VariableDeclSyntax {
     return nil
   }
 
+  var columnTransformerName: String? {
+    guard
+      let attr = columnAttribute,
+      case .argumentList(let list) = attr.arguments
+    else {
+      return nil
+    }
+
+    for argument in list {
+      if argument.label?.trimmedDescription == "transformer", let member = argument.expression.as(MemberAccessExprSyntax.self), let base = member.base {
+        return base.trimmedDescription
+//        let description = argument.expression.trimmedDescription
+//        if description.hasSuffix(".self") {
+//          return String(description.dropLast(5))
+//        }
+      }
+    }
+
+    return nil
+  }
+
   func accessorsMatching(_ predicate: (TokenKind) -> Bool) -> [AccessorDeclSyntax] {
     let accessors: [AccessorDeclListSyntax.Element] = bindings.compactMap { patternBinding in
       switch patternBinding.accessorBlock?.accessors {

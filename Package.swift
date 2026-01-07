@@ -52,7 +52,10 @@ let package = Package(
     ),
     .target(
       name: "DatabaseMacros",
-      dependencies: ["DatabaseMacrosMacros"]
+      dependencies: [
+        "DatabaseMacrosMacros",
+        .product(name: "GRDB", package: "GRDB.swift"),
+      ]
     ),
     .executableTarget(
       name: "DatabaseMacrosBenchmarks",
@@ -69,7 +72,7 @@ let package = Package(
     .testTarget(
       name: "DatabaseMacrosTests",
       dependencies: [
-        "DatabaseMacrosMacros",
+        "DatabaseMacros",
         .product(
           name: "MacroTesting",
           package: "swift-macro-testing"

@@ -12,7 +12,10 @@ public macro Table() = #externalMacro(
 )
 
 @attached(peer)
-public macro Column(_ name: String = "") = #externalMacro(
+public macro Column(
+  _ name: String = "",
+  transformer: (any DatabaseValueTransformer.Type)? = nil
+) = #externalMacro(
   module: "DatabaseMacrosMacros",
   type: "ColumnMacro"
 )

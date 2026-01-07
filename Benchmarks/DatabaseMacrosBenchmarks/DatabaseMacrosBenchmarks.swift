@@ -31,6 +31,20 @@ let benchmarks: @Sendable () -> Void = {
     }
   }
 
+  Benchmark("X") { benchmark in
+    try! seededDBQueue.read { db in
+      benchmark.startMeasurement()
+      defer {
+        benchmark.stopMeasurement()
+      }
+
+      for _ in benchmark.scaledIterations {
+        let items = try X.fetchAll(db)
+        precondition(items.count == maxItemCount)
+      }
+    }
+  }
+
   Benchmark("LightCodable") { benchmark in
     try! seededDBQueue.read { db in
       benchmark.startMeasurement()

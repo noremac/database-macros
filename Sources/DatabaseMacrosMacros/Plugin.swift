@@ -5,5 +5,6 @@ import SwiftSyntaxMacros
 struct DatabaseMacrosPlugin: CompilerPlugin {
   let providingMacros: [Macro.Type] = [
     TableMacro.self,
+    ColumnMacro.self,
   ]
 }
