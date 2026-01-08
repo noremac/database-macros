@@ -1,9 +1,58 @@
 import Benchmark
-
-let seededDBQueue = try! makeDBQueue()
+import GRDB
 
 let benchmarks: @Sendable () -> Void = {
-  Benchmark("FullCodable") { benchmark in
+  let seededDBQueue = try! makeDBQueue()
+
+  Benchmark("Write - codable") { benchmark in
+    let dbQueue = try DatabaseQueue()
+    try dbQueue.migrate()
+
+    try dbQueue.write { db in
+      benchmark.startMeasurement()
+      defer {
+        benchmark.stopMeasurement()
+      }
+
+      for i in 0..<maxItemCount {
+        try FullItem_Codable(id: i, a: i, b: i, c: i, foo: .init(a: i, b: i, c: i)).insert(db)
+      }
+    }
+  }
+
+  Benchmark("Write - table convertible") { benchmark in
+    let dbQueue = try DatabaseQueue()
+    try dbQueue.migrate()
+
+    try dbQueue.write { db in
+      benchmark.startMeasurement()
+      defer {
+        benchmark.stopMeasurement()
+      }
+
+      for i in 0..<maxItemCount {
+        try FullItem_Table_DatabaseValueConvertible(id: i, a: i, b: i, c: i, foo: .init(a: i, b: i, c: i)).insert(db)
+      }
+    }
+  }
+
+  Benchmark("Write - table transformer") { benchmark in
+    let dbQueue = try DatabaseQueue()
+    try dbQueue.migrate()
+
+    try dbQueue.write { db in
+      benchmark.startMeasurement()
+      defer {
+        benchmark.stopMeasurement()
+      }
+
+      for i in 0..<maxItemCount {
+        try FullItem_Table_Transformer(id: i, a: i, b: i, c: i, foo: .init(a: i, b: i, c: i)).insert(db)
+      }
+    }
+  }
+
+  Benchmark("FullItem - codable") { benchmark in
     try! seededDBQueue.read { db in
       benchmark.startMeasurement()
       defer {
@@ -11,13 +60,13 @@ let benchmarks: @Sendable () -> Void = {
       }
 
       for _ in benchmark.scaledIterations {
-        let items = try FullCodableItem.fetchAll(db)
+        let items = try FullItem_Codable.fetchAll(db)
         precondition(items.count == maxItemCount)
       }
     }
   }
 
-  Benchmark("FullTable") { benchmark in
+  Benchmark("FullItem - table convertible") { benchmark in
     try! seededDBQueue.read { db in
       benchmark.startMeasurement()
       defer {
@@ -25,13 +74,13 @@ let benchmarks: @Sendable () -> Void = {
       }
 
       for _ in benchmark.scaledIterations {
-        let items = try FullTableItem.fetchAll(db)
+        let items = try FullItem_Table_DatabaseValueConvertible.fetchAll(db)
         precondition(items.count == maxItemCount)
       }
     }
   }
 
-  Benchmark("X") { benchmark in
+  Benchmark("FullItem - table transformer") { benchmark in
     try! seededDBQueue.read { db in
       benchmark.startMeasurement()
       defer {
@@ -39,13 +88,13 @@ let benchmarks: @Sendable () -> Void = {
       }
 
       for _ in benchmark.scaledIterations {
-        let items = try X.fetchAll(db)
+        let items = try FullItem_Table_Transformer.fetchAll(db)
         precondition(items.count == maxItemCount)
       }
     }
   }
 
-  Benchmark("LightCodable") { benchmark in
+  Benchmark("IntOnly - codable") { benchmark in
     try! seededDBQueue.read { db in
       benchmark.startMeasurement()
       defer {
@@ -53,13 +102,13 @@ let benchmarks: @Sendable () -> Void = {
       }
 
       for _ in benchmark.scaledIterations {
-        let items = try LightCodableItem.fetchAll(db)
+        let items = try IntOnlyItem_Codable.fetchAll(db)
         precondition(items.count == maxItemCount)
       }
     }
   }
 
-  Benchmark("LightTable") { benchmark in
+  Benchmark("IntOnly - table") { benchmark in
     try! seededDBQueue.read { db in
       benchmark.startMeasurement()
       defer {
@@ -67,7 +116,7 @@ let benchmarks: @Sendable () -> Void = {
       }
 
       for _ in benchmark.scaledIterations {
-        let items = try LightTableItem.fetchAll(db)
+        let items = try IntOnlyItem_Table.fetchAll(db)
         precondition(items.count == maxItemCount)
       }
     }

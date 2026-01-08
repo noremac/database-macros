@@ -3,26 +3,32 @@ import GRDB
 
 let maxItemCount = 100_000
 
+extension DatabaseWriter {
+  func migrate() throws {
+    var migrator = DatabaseMigrator()
+
+    migrator.registerMigration("add item table") { db in
+      try db.create(table: "item") { table in
+        table.primaryKey("id", .integer)
+        table.column("a", .integer)
+        table.column("b", .integer)
+        table.column("c", .integer)
+        table.column("foo", .jsonText)
+      }
+    }
+
+    try migrator.migrate(self)
+  }
+}
+
 func makeDBQueue(seed: Bool = true) throws -> DatabaseQueue {
   let dbQueue = try DatabaseQueue()
-
-  var migrator = DatabaseMigrator()
-  migrator.registerMigration("add item table") { db in
-    try db.create(table: "item") { table in
-      table.primaryKey("id", .integer)
-      table.column("a", .integer)
-      table.column("b", .integer)
-      table.column("c", .integer)
-      table.column("foo", .jsonText)
-    }
-  }
-
-  try migrator.migrate(dbQueue)
+  try dbQueue.migrate()
 
   if seed {
     try dbQueue.write { db in
       for i in 0..<maxItemCount {
-        try FullCodableItem(
+        try FullItem_Codable(
           id: i,
           a: i,
           b: i,
@@ -46,7 +52,7 @@ struct Foo: Codable, DatabaseValueConvertible {
   var c: Int
 }
 
-struct FullCodableItem: Codable, FetchableRecord, PersistableRecord {
+struct FullItem_Codable: Codable, FetchableRecord, PersistableRecord {
   static var databaseTableName: String {
     "item"
   }
@@ -59,7 +65,7 @@ struct FullCodableItem: Codable, FetchableRecord, PersistableRecord {
 }
 
 @Table
-struct X: FetchableRecord, PersistableRecord {
+struct FullItem_Table_Transformer: FetchableRecord, PersistableRecord {
   static var databaseTableName: String {
     "item"
   }
@@ -74,7 +80,7 @@ struct X: FetchableRecord, PersistableRecord {
 }
 
 @Table
-struct FullTableItem: FetchableRecord, PersistableRecord {
+struct FullItem_Table_DatabaseValueConvertible: FetchableRecord, PersistableRecord {
   static var databaseTableName: String {
     "item"
   }
@@ -86,7 +92,7 @@ struct FullTableItem: FetchableRecord, PersistableRecord {
   var foo: Foo?
 }
 
-struct LightCodableItem: Codable, FetchableRecord, PersistableRecord {
+struct IntOnlyItem_Codable: Codable, FetchableRecord, PersistableRecord {
   static var databaseTableName: String {
     "item"
   }
@@ -98,7 +104,7 @@ struct LightCodableItem: Codable, FetchableRecord, PersistableRecord {
 }
 
 @Table
-struct LightTableItem: FetchableRecord, PersistableRecord {
+struct IntOnlyItem_Table: FetchableRecord, PersistableRecord {
   static var databaseTableName: String {
     "item"
   }
